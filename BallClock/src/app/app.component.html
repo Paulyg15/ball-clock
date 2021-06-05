@@ -1,0 +1,27 @@
+<div class="row">
+  <h3 class="col-12 text-center">Ball Clock</h3>
+  <div class="col-12 mt-5 row justify-content-center">
+    <div class="col-12 text-center">
+      <input   
+        class="col-1 text-center"      
+        type="number"
+        name="ballCount"
+        [(ngModel)]="ballCount"
+      />
+    </div>
+    <div class="col-12 text-center">
+      <label for="ballCount" class="col-6">Ball Count</label>
+    </div>
+  </div>
+  <div class="col-12 mt-4 row justify-content-center">
+    <div class="col-2 clock-box row text-center pt-4">
+      <h1 class="col-5">
+        {{ clockHour }}
+      </h1>
+          :
+        <h1 class="col-5">
+          {{ clockMinute }}
+        </h1>
+    </div>
+  </div>
+</div>
