@@ -24,55 +24,46 @@ export class AppComponent {
 
 
   setBallCount() {
+    this.reset();
     this.startTime = moment();
     this.calculating = true;
     this.setupQueue()
-    this.minuteTrack = [];
-    this.fiveMinuteTrack = [];
-    this.hourTrack = [];
+    
     this.lapseMinutesTill12Hours();
   }
 
   setupQueue() {
     for (let i = 0; i < this.ballCount; i++) {
-      this.queue.push(`Ball${i}`)
+      this.queue.push(i)
     }
   }
 
-  queueIsInOriginalOrder() {
-    if (!this.queueHasChanged) {
-      return false;
-    }
-    
+  queueIsInOriginalOrder() {    
     let queueIsInOrder = true;
     let index = 0;
     for (let ball of this.queue) {
-      if (ball != `Ball${index}`) {
+      if (ball != index) {
         queueIsInOrder = false;
         break;
       }
+      index ++;
     }
     return queueIsInOrder;
   }
 
   lapseMinutesTill12Hours() {
-    while(!(this.queueHasChanged && this.minuteTrack.length == 0 && this.fiveMinuteTrack.length == 0 && this.hourTrack.length == 0)) {
-      this.dropMinuteBall();
-    }
+    let keepLooping = true;
 
-    this.set12HourPattern();
-    this.repeat12HourPattern();
-
-    // const interval = setInterval(() => {
-    //   if (this.queueHasChanged && this.minuteTrack.length == 0 && this.fiveMinuteTrack.length == 0 && this.hourTrack.length == 0) {
-    //     clearInterval(interval);
-    //     this.set12HourPattern();
-    //     this.repeat12HourPattern();
-    //   }
-    //   else {
-    //     this.dropMinuteBall();
-    //   }
-    // }, 1)
+    while(keepLooping) {
+      if (this.queueHasChanged && this.minuteTrack.length == 0 && this.fiveMinuteTrack.length == 0 && this.hourTrack.length == 0) {
+        keepLooping = false;
+        this.set12HourPattern();
+        this.repeat12HourPattern();
+      }
+      else {
+        this.dropMinuteBall();
+      }
+    }    
   }
 
   dropMinuteBall() {
@@ -115,52 +106,61 @@ export class AppComponent {
   }
 
   repeat12HourPattern() {
-    while (!this.queueIsInOriginalOrder()) {
-      this.apply12HourPattern();
+    let keepLooping = true;
+    while (keepLooping) {
+      if (!this.queueIsInOriginalOrder()) {
+        this.apply12HourPattern();
+      }
+      else {
+        keepLooping = false;
+        this.calculateDaysToCompletion();
+        this.endTime = moment();
+        this.computationDuration = moment(this.endTime.diff(this.startTime)).format("m[m] s[s] SSS[ms]")
+        this.calculating = false;
+      }
     }
-
-    this.calculateDaysToCompletion();
-    this.endTime = moment();
-    this.computationDuration = moment(this.endTime.diff(this.startTime)).format("m[m] s[s]")
-    this.calculating = false;
-
-    // const patternInterval = setInterval(() => {
-    //   if (this.queueIsInOriginalOrder()) {
-    //     this.calculateDaysToCompletion();
-    //     this.endTime = moment();
-    //     this.computationDuration = moment(this.endTime.diff(this.startTime)).format("m[m] s[s]")
-    //     this.calculating = false;
-    //     clearInterval(patternInterval);
-    //   }
-    //   else {
-    //     this.apply12HourPattern();
-    //   }
-    // }, 1)
   }
 
   set12HourPattern() {
     const pattern = [];
     for (let i = 0; i < this.ballCount; i++) {
-      const originalIndex = i;
-      const newIndex = this.queue.findIndex((ball) => ball === `Ball${i}`);
+      let originalIndex = i;
+      let newIndex = this.queue.findIndex((ball) => ball === i);
       pattern.push({originalIndex, newIndex});
     }
-    this.pattern = pattern.sort((a,b) => a.newIndex > b.newIndex ? -1 : 1);
+    this.pattern = pattern;
     console.log('here is pattern', this.pattern)
   }
 
   apply12HourPattern() {
     const newQueue = [];
-    for (let i of this.pattern) {
-      newQueue.push(`Ball${i.originalIndex}`)
+    for (let i = 0; i < this.pattern.length; i++) {
+      const patternIndex = this.pattern.find((p) => p.newIndex == i);
+      newQueue.push(this.queue[patternIndex.originalIndex])
     }
 
     this.queue = newQueue;
+    this.halfDaysPassed ++;
   }
 
   calculateDaysToCompletion() {
-    this.daysToCompletion = this.halfDaysPassed * 2;
+    this.daysToCompletion = this.halfDaysPassed / 2;
     this.showCalculation = true;
+  }
+
+  reset() {
+    this.queue = [];
+    this.minuteTrack = [];
+    this.fiveMinuteTrack = [];
+    this.hourTrack = [];
+    this.halfDaysPassed = 0;
+    this.daysToCompletion = 0;
+    this.queueHasChanged = false;
+    this.showCalculation = false;
+    this.startTime = null;
+    this.endTime = null;
+    this.computationDuration = null;
+    this.pattern = [];
   }
 
 }

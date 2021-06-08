@@ -14,9 +14,12 @@
         type="text"
         name="ballCount"
         [(ngModel)]="ballCount"
-        (change)="setBallCount()"
+        (ngModelChange)="reset()"
       >
-    </div>    
+    </div>  
+    <div class="col-12 text-center">
+      <div class="col-2 btn btn-primary mt-2" (click)="setBallCount()">Calculate</div>
+    </div>  
   </div>
   <div *ngIf="showCalculation" class="col-12 row mt-5">
     <div class="col-6 text-center">
